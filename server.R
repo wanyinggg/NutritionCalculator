@@ -1,38 +1,40 @@
 library(shiny)
 library(ggplot2)
+library(DT)
+library(plotly)
 
 bmi <- function(weight, height){
-  weight/(height*height)
+  format(round(weight/(height*height),2))
 }
 
 bmr <- function(age, gender, weight, height){
   if(gender=="Male"){
-    bmr1 <- 66 + (13.7*weight) + (5*(height*100)) - (6.8*age)
+    round(66 + (13.7*weight) + (5*(height*100)) - (6.8*age),2)
   }else if(gender=="Female"){
-    bmr2 <- 655 + (9.6*weight) + (1.8*(height*100)) - (4.7*age)
+    round(655 + (9.6*weight) + (1.8*(height*100)) - (4.7*age),2)
   }
 }
 
 tdee <- function(activity,bmr){
   if(activity=="0"){
-    tdee1 <- bmr*1.2
+    round(bmr*1.2,2)
   }else if(activity=="1"){
-    tdee2 <- bmr*1.375
+    round(bmr*1.375,2)
   }else if(activity=="2"){
-    tdee3 <- bmr*1.55
+    round(bmr*1.55,2)
   }else if(activity=="3"){
-    tdee4 <- bmr*1.725
+    round(bmr*1.725,2)
   }else if(activity=="4"){
-    tdee5 <- bmr*1.9
+    round(bmr*1.9,2)
   }
 }
 
 minIdealWeight <- function(height){
-  minIdealWeight <- round(18.5*(height*height), digits=2)
+  round(18.5*(height*height), digits=2)
 }
 
 maxIdealWeight <- function(height){
-  maxIdealWeight <- round(24.9*(height*height), digits=2)
+  round(24.9*(height*height), digits=2)
 }
 
 idealWeight <- function(minIdealWeight, maxIdealWeight){
@@ -52,11 +54,11 @@ bmiStatus <- function(bmi){
 
 dailyCalorie <- function(tdee, bmi){
   if(bmi<18.5){   #to gain weight
-    dailyCalorie1 <- tdee + 1000
+    tdee + 1000
   }else if(bmi>18.5 && bmi<24.9){
-    dailyCalorie2 <- tdee
+    tdee
   }else if(bmi>24.9){
-    dailyCalorie3 <- tdee-1000
+    tdee-1000
   }
 }
 
@@ -191,14 +193,104 @@ progress <- function(weight, minIdealWeight, maxIdealWeight){
   }
 }
 
+nutrition<-read.csv("nutrition.csv")
+
+#create data frame for nutrient table
+food_list <- data.frame(matrix(ncol=6,nrow=0))
+x <- c("Food","Calories (per serving)","Fat (per Serving)","Quantity","Total Fat","Total Calories")
+colnames(food_list) <- x
+
+#create vector to store macro-nutrients and vitamins amount
+macro_list <- c("Calcium", "Carbohydrate","Fiber","Iron","Magnesium","Potassium","Protein","Sodium","Water")
+vitamin_list <- c("Vitamin A", "Vitamin B6","Vitamin B12","Vitamin C", "Vitamin D", "Vitamin E", "Vitamin K")
+sum_macro <- c()
+sum_vitamin <- c()
 shinyServer(function(input, output) {
-  output$bmi <- renderText({bmi(input$weight, input$height)})
-  output$bmr <- renderText({bmr(input$age, input$gender, input$weight, input$height)})
-  output$tdee <- renderText({tdee(input$activity, bmr(input$age, input$gender, input$weight, input$height))})
-  output$goalweight <- renderText({noquote(paste0(minIdealWeight(input$height), " to ", (maxIdealWeight(input$height))))})
-  output$bmiStatus <- renderText({bmiStatus(bmi(input$weight, input$height))})
-  output$dailyCalorie <- renderText({dailyCalorie(tdee(input$activity, bmr(input$age, input$gender, input$weight, input$height)),bmi(input$weight, input$height))})
-  output$macros <- renderPlot({macros(bmi(input$weight, input$height),dailyCalorie(tdee(input$activity, bmr(input$age, input$gender, input$weight, input$height)),bmi(input$weight, input$height)))})
-  output$progress <- renderPlot({progress(input$weight,minIdealWeight(input$height),maxIdealWeight(input$height))})
+  observeEvent(input$submit, {
+    output$bmi <- renderText(isolate({bmi(input$weight, input$height)}))
+    output$bmr <- renderText(isolate({bmr(input$age, input$gender, input$weight, input$height)}))
+    output$tdee <- renderText(isolate({tdee(input$activity, bmr(input$age, input$gender, input$weight, input$height))}))
+    output$goalweight <- renderText(isolate({noquote(paste0(minIdealWeight(input$height), " to ", (maxIdealWeight(input$height))))}))
+    output$bmiStatus <- renderText(isolate({bmiStatus(bmi(input$weight, input$height))}))
+    output$dailyCalorie <- renderText(isolate({dailyCalorie(tdee(input$activity, bmr(input$age, input$gender, input$weight, input$height)),bmi(input$weight, input$height))}))
+    output$macros <- renderPlot(isolate({macros(bmi(input$weight, input$height),dailyCalorie(tdee(input$activity, bmr(input$age, input$gender, input$weight, input$height)),bmi(input$weight, input$height)))}))
+    output$progress <- renderPlot(isolate({progress(input$weight,minIdealWeight(input$height),maxIdealWeight(input$height))}))
+  })
+  
+  # Nutrient Table output
+  output$nutrient_table = renderDataTable(df(),rownames = F)
+  df <- eventReactive(input$add,{
+    if(input$food_id!=""&& !is.null(input$no_of_serving)&&input$add>0){
+      newrow = data.frame(Food = nutrition[[input$food_id,2]] ,
+                          Calorie= nutrition[[input$food_id,4]],
+                          Fat = nutrition[[input$food_id,5]],
+                          Quantity = input$no_of_serving,
+                          Total_Calorie = input$no_of_serving*as.numeric(nutrition[[input$food_id,5]]),
+                          Total_fat = input$no_of_serving*as.numeric(nutrition[[input$food_id,4]]))
+      food_list[nrow(food_list) + 1,] <<- c(newrow)
+    }
+    
+    food_list
+  })
+  
+  output$macro_plot <- renderPlotly(macro())
+  macro <- eventReactive(input$add,{
+    if(input$food_id!="" && !is.null(input$no_of_serving&&input$add>0)){
+      #value = mg
+      newMacro <- c (calcium= nutrition[[input$food_id,16]]*input$no_of_serving,
+                     carbohydrate= nutrition[[input$food_id,21]]*100*input$no_of_serving,
+                     fiber= nutrition[[input$food_id,22]]*100*input$no_of_serving,
+                     iron= nutrition[[input$food_id,17]]*input$no_of_serving,
+                     magnesium= nutrition[[input$food_id,18]]*input$no_of_serving,
+                     potassium= nutrition[[input$food_id,19]]*input$no_of_serving,
+                     protein= nutrition[[input$food_id,20]]*100*input$no_of_serving,
+                     sodium = nutrition[[input$food_id,8]]*100*input$no_of_serving,
+                     water= nutrition[[input$food_id,25]]*100*input$no_of_serving)
+      sum_macro <<- cbind(sum_macro,newMacro)
+      sum_macro <- rowSums(sum_macro)
+      total_macro <- data.frame( macro = macro_list, amount = sum_macro)
+      p <- plot_ly(x = total_macro$macro,
+                   y = total_macro$amount,
+                   name = "Macronutrients",
+                   type = "bar",
+                   marker = list(color = "rgb(201, 134, 134)")
+      )
+      p <- p %>%
+        layout( xaxis = list(title = "Nutrients"),
+                yaxis = list(title = "Amount (mg)")
+        )
+    }
+  })
+  
+  output$vitamin_plot <- renderPlotly(vitamin())
+  vitamin <- eventReactive(input$add,{
+    if(input$food_id!="" && !is.null(input$no_of_serving&&input$add>0)){
+      #value = mcg
+      newVitamin <- c (A = nutrition[[input$food_id,9]]*input$no_of_serving,
+                       B6 = nutrition[[input$food_id,11]]*1000*input$no_of_serving,
+                       B12 = nutrition[[input$food_id,10]]*input$no_of_serving,
+                       C = nutrition[[input$food_id,12]]*1000*input$no_of_serving,
+                       D = nutrition[[input$food_id,13]]*0.025*input$no_of_serving,
+                       E = nutrition[[input$food_id,14]]*1000*input$no_of_serving,
+                       K = nutrition[[input$food_id,20]]*input$no_of_serving)
+      
+      sum_vitamin <<- cbind(sum_vitamin,newVitamin)
+      sum_vitamin <- rowSums(sum_vitamin)
+      total_vitamin <- data.frame( vitamin = vitamin_list, amount = sum_vitamin)
+      p <- plot_ly(x = total_vitamin$vitamin,
+                   y = total_vitamin$amount,
+                   name = "Vitamin",
+                   type = "bar",
+                   marker = list(color = "rgb(231, 207, 188)")
+      )
+      p <- p %>%
+        layout( xaxis = list(title = "Vitamin"),
+                yaxis = list(title = "Amount (mcg) ")
+                
+        )
+    }
+  })
+  
 })
+
 
