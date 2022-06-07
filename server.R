@@ -211,7 +211,7 @@ x <- c("Food","Calories_Per_Serving","Fat_Per_Serving","Quantity","Total_Fat","T
 colnames(food_list) <- x
 
 #Create vector to store macro-nutrients and vitamins amount
-macro_list <- c("Calcium", "Carbohydrate","Fiber","Iron","Magnesium","Potassium","Protein","Sodium","Water")
+macro_list <- data.frame("Calcium", "Carbohydrate","Fiber","Iron","Magnesium","Potassium","Protein","Sodium","Water")
 vitamin_list <- c("Vitamin A", "Vitamin B6","Vitamin B12","Vitamin C", "Vitamin D", "Vitamin E", "Vitamin K")
 sum_macro <- c()
 sum_vitamin <- c()
@@ -295,7 +295,7 @@ shinyServer(function(input, output) {
     total_macro_plot(total_macro)
   })
   #Plot bar chart using plotBar() function
-  output$macro_plot <- renderPlotly(plotBar(total_macro_plot(),"Macronutrients","Nutrients","rgb(201, 134, 134)"),macro_list)
+  output$macro_plot <- renderPlotly(plotBar(total_macro_plot(),"Macronutrients","Nutrients","rgb(201, 134, 134)"))
   
   #Vitamin bar plot
   total_vitamin_plot<-reactiveVal()
@@ -334,7 +334,7 @@ shinyServer(function(input, output) {
   #Function to plot bar chart 
   #table: table used to plot bar chart, name: name of plot, xname: x-axis name, colorCode: color for bar chart
   plotBar <- function(table,name,xname,colorCode){
-    p <- plot_ly(x = taable$macro,
+    p <- plot_ly(x = table$macro,
                  y = table$amount,
                  name = name,
                  type = "bar",
