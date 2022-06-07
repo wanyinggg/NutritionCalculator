@@ -46,7 +46,7 @@ idealWeight <- function(minIdealWeight, maxIdealWeight){
   print(minIdealWeight,"to", maxIdealWeight)
 }
 
-##Function to display BMI status 
+##Function to display BMI status
 bmiStatus <- function(bmi){
   
   if(bmi<18.5){
@@ -76,7 +76,7 @@ macros <- function(bmi, dailyCalorie){
     proteinCalorie1 <- (30/100) * dailyCalorie
     fatCalorie1 <- (15/100) * dailyCalorie
     
-    df <- data.frame(value = c(carbsCalorie1, proteinCalorie1, fatCalorie1), 
+    df <- data.frame(value = c(carbsCalorie1, proteinCalorie1, fatCalorie1),
                      group = c("Carbohydrates", "Protein", "Fats"))
     
     ggplot(df, aes(x = "", y = value, fill = group)) +
@@ -92,7 +92,7 @@ macros <- function(bmi, dailyCalorie){
     proteinCalorie2 <- (30/100) * dailyCalorie
     fatCalorie2 <- (20/100) * dailyCalorie
     
-    df <- data.frame(value = c(carbsCalorie2, proteinCalorie2, fatCalorie2), 
+    df <- data.frame(value = c(carbsCalorie2, proteinCalorie2, fatCalorie2),
                      group = c("Carbohydrates", "Protein", "Fats"))
     
     ggplot(df, aes(x = "", y = value, fill = group)) +
@@ -108,7 +108,7 @@ macros <- function(bmi, dailyCalorie){
     proteinCalorie3 <- (30/100) * dailyCalorie
     fatCalorie3 <- (30/100) * dailyCalorie
     
-    df <- data.frame(value = c(carbsCalorie3, proteinCalorie3, fatCalorie3), 
+    df <- data.frame(value = c(carbsCalorie3, proteinCalorie3, fatCalorie3),
                      group = c("Carbohydrates", "Protein", "Fats"))
     
     
@@ -217,6 +217,7 @@ sum_macro <- c()
 sum_vitamin <- c()
 sum_calories <- 0;
 
+
 shinyServer(function(input, output) {
   observeEvent(input$submit, {
     output$bmi <- renderText(isolate({bmi(input$weight, input$height)}))
@@ -232,23 +233,23 @@ shinyServer(function(input, output) {
   #Nutrient table
   this_table<-reactiveVal(food_list)
   observeEvent(input$add, {
-  newRow <- rbind(data.frame("Food" = nutrition[[input$food_id,2]] ,
-                             "Calories_Per_Serving"= nutrition[[input$food_id,4]],
-                             "Fat_Per_Serving" = nutrition[[input$food_id,5]],
-                             "Quantity" = input$no_of_serving,
-                             "Total_Fat" = input$no_of_serving*as.numeric(nutrition[[input$food_id,5]]),
-                             "Total_Calorie" = input$no_of_serving*as.numeric(nutrition[[input$food_id,4]])),this_table())
-  this_table(newRow)
+    newRow <- rbind(data.frame("Food" = nutrition[[input$food_id,2]] ,
+                               "Calories_Per_Serving"= nutrition[[input$food_id,4]],
+                               "Fat_Per_Serving" = nutrition[[input$food_id,5]],
+                               "Quantity" = input$no_of_serving,
+                               "Total_Fat" = input$no_of_serving*as.numeric(nutrition[[input$food_id,5]]),
+                               "Total_Calorie" = input$no_of_serving*as.numeric(nutrition[[input$food_id,4]])),this_table())
+    this_table(newRow)
   })
   observeEvent(input$delete, {
     this_table(food_list)
   })
   output$nutrient_table<- DT::renderDataTable({
-  datatable(this_table(), selection = 'single',editable = TRUE, 
+    datatable(this_table(), selection = 'single',editable = TRUE,
               options = list(dom = 't'))
   })
   
-  #Total calories 
+  #Total calories
   total_calories<-reactiveVal()
   observeEvent(input$add,{
     sum_calories <<- sum_calories + nutrition[[input$food_id,4]]*input$no_of_serving
@@ -261,72 +262,88 @@ shinyServer(function(input, output) {
   output$calories <- renderValueBox({
     valueBox(total_calories(),"kcal","Calories",icon = icon("fire"), color = "navy")})
   
-  #Macro nutrients bar plot
-  output$macro_plot <- renderPlotly(total_macro())
-  macro <- eventReactive(input$add,{
-    if(input$food_id!="" && !is.null(input$no_of_serving&&input$add>0)){
-      
-      #Macro-nutrients amount of currently selected food
-      #value = mg
-      newMacro <- c (calcium= nutrition[[input$food_id,16]]*input$no_of_serving,
-                     carbohydrate= nutrition[[input$food_id,21]]*100*input$no_of_serving,
-                     fiber= nutrition[[input$food_id,22]]*100*input$no_of_serving,
-                     iron= nutrition[[input$food_id,17]]*input$no_of_serving,
-                     magnesium= nutrition[[input$food_id,18]]*input$no_of_serving,
-                     potassium= nutrition[[input$food_id,19]]*input$no_of_serving,
-                     protein= nutrition[[input$food_id,20]]*100*input$no_of_serving,
-                     sodium = nutrition[[input$food_id,8]]*100*input$no_of_serving,
-                     water= nutrition[[input$food_id,25]]*100*input$no_of_serving)
-      
-      #Add the new food's macro-nutrients info into the vector
-      sum_macro <<- cbind(sum_macro,newMacro)
-      #Sum up the value of new and initial macro-nutrients amount
-      sum_macro <- rowSums(sum_macro)
-      #Store the macro-nutrients name with its updated amount in data frame
-      total_macro <- data.frame( macro = macro_list, amount = sum_macro)
-      
-      p <- plot_ly(x = total_macro$macro,
-                   y = total_macro$amount,
-                   name = "Macronutrients",
-                   type = "bar",
-                   marker = list(color = "rgb(201, 134, 134)")
-      )
-      p <- p %>%
-        layout( xaxis = list(title = "Nutrients"),
-                yaxis = list(title = "Amount (mg)")
-        )
-    }
+  #Macro bar plot
+  total_macro_plot<-reactiveVal()
+  #If add button is pressed
+  observeEvent(input$add,{
+    newMacro <- c (calcium= nutrition[[input$food_id,16]]*input$no_of_serving,
+                   carbohydrate= nutrition[[input$food_id,21]]*100*input$no_of_serving,
+                   fiber= nutrition[[input$food_id,22]]*100*input$no_of_serving,
+                   iron= nutrition[[input$food_id,17]]*input$no_of_serving,
+                   magnesium= nutrition[[input$food_id,18]]*input$no_of_serving,
+                   potassium= nutrition[[input$food_id,19]]*input$no_of_serving,
+                   protein= nutrition[[input$food_id,20]]*100*input$no_of_serving,
+                   sodium = nutrition[[input$food_id,8]]*100*input$no_of_serving,
+                   water= nutrition[[input$food_id,25]]*100*input$no_of_serving)
+    #Add the new food's macro-nutrients info into the vector
+    sum_macro <<- cbind(sum_macro,newMacro)
+    #Sum up the value of new and initial macro-nutrients amount
+    sum_macro <- rowSums(sum_macro)
+    #Store the macro-nutrients name with its updated amount in data frame
+    total_macro <- data.frame( macro = macro_list, amount = sum_macro)
+    #
+    total_macro_plot(total_macro)
   })
+  
+  #If clear food button is pressed
+  observeEvent(input$delete,{
+    #Create a vector of size 9 with all 0 value
+    sum_macro <<- c(0,0,0,0,0,0,0,0,0)
+    #Store the macro-nutrients name with its updated amount in data frame
+    total_macro <- data.frame( macro = macro_list, amount = sum_macro)
+    #
+    total_macro_plot(total_macro)
+  })
+  #Plot bar chart using plotBar() function
+  output$macro_plot <- renderPlotly(plotBar(total_macro_plot(),"Macronutrients","Nutrients","rgb(201, 134, 134)"),macro_list)
   
   #Vitamin bar plot
-  output$vitamin_plot <- renderPlotly(vitamin())
-  vitamin <- eventReactive(input$add,{
-    if(input$food_id!="" && !is.null(input$no_of_serving&&input$add>0)){
-      #value = mcg
-      newVitamin <- c (A = nutrition[[input$food_id,9]]*input$no_of_serving,
-                       B6 = nutrition[[input$food_id,11]]*1000*input$no_of_serving,
-                       B12 = nutrition[[input$food_id,10]]*input$no_of_serving,
-                       C = nutrition[[input$food_id,12]]*1000*input$no_of_serving,
-                       D = nutrition[[input$food_id,13]]*0.025*input$no_of_serving,
-                       E = nutrition[[input$food_id,14]]*1000*input$no_of_serving,
-                       K = nutrition[[input$food_id,20]]*input$no_of_serving)
-      
-      sum_vitamin <<- cbind(sum_vitamin,newVitamin)
-      sum_vitamin <- rowSums(sum_vitamin)
-      total_vitamin <- data.frame( vitamin = vitamin_list, amount = sum_vitamin)
-      p <- plot_ly(x = total_vitamin$vitamin,
-                   y = total_vitamin$amount,
-                   name = "Vitamin",
-                   type = "bar",
-                   marker = list(color = "rgb(231, 207, 188)")
-      )
-      p <- p %>%
-        layout( xaxis = list(title = "Vitamin"),
-                yaxis = list(title = "Amount (mcg) ")
-                
-        )
-    }
+  total_vitamin_plot<-reactiveVal()
+  #If add food button is pressed
+  observeEvent(input$add,{
+    newVitamin <- c (A = nutrition[[input$food_id,9]]*input$no_of_serving,
+                     B6 = nutrition[[input$food_id,11]]*1000*input$no_of_serving,
+                     B12 = nutrition[[input$food_id,10]]*input$no_of_serving,
+                     C = nutrition[[input$food_id,12]]*1000*input$no_of_serving,
+                     D = nutrition[[input$food_id,13]]*0.025*input$no_of_serving,
+                     E = nutrition[[input$food_id,14]]*1000*input$no_of_serving,
+                     K = nutrition[[input$food_id,20]]*input$no_of_serving)
+    #Add the new food's vitamin info into the vector
+    sum_vitamin <<- cbind(sum_vitamin,newVitamin)
+    #Sum up the value of new and initial vitamin amount
+    sum_vitamin <- rowSums(sum_vitamin)
+    #Store the vitamin name with its updated amount in data frame
+    total_vitamin <- data.frame( vitamin = vitamin_list, amount = sum_vitamin)
+    #
+    total_vitamin_plot(total_vitamin)
   })
   
+  #If clear food button is pressed
+  observeEvent(input$delete,{
+    #Create a vector of size 7 with all 0 value
+    sum_vitamin <<- c(0,0,0,0,0,0,0)
+    #Store the macro-nutrients name with its updated amount in data frame
+    total_vitamin <- data.frame( vitamin = vitamin_list, amount = sum_vitamin)
+    #
+    total_vitamin_plot(total_vitamin)
+  })
+  
+  #Plot bar chart using plotBar() function
+  output$vitamin_plot <- renderPlotly(plotBar(total_vitamin_plot(),"Vitamin","Vitamin","rgb(231, 207, 188)"))
+  
+  #Function to plot bar chart 
+  #table: table used to plot bar chart, name: name of plot, xname: x-axis name, colorCode: color for bar chart
+  plotBar <- function(table,name,xname,colorCode){
+    p <- plot_ly(x = taable$macro,
+                 y = table$amount,
+                 name = name,
+                 type = "bar",
+                 marker = list(color = colorCode)
+    )
+    p <- p %>%
+      layout( xaxis = list(title = xname),
+              yaxis = list(title = "Amount (mg)")
+      )
+  }
+  
 })
-
