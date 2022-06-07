@@ -5,6 +5,7 @@ library(shinydashboard)
 library(plotly)
 library(DT)
 library(ggplot2)
+library(shinyjs)
 
 nutrition<-read.csv("nutrition.csv")
 
@@ -81,15 +82,22 @@ shinyUI(fluidPage(
                           ),
                           
                           numericInput(inputId = 'no_of_serving',
-                                       label = 'Servings(g)',
+                                       label = 'Servings(per 100g)',
                                        min=1,max=10000,1),
                           
                           actionButton("add","Add Food"),
+                          actionButton("delete","Delete Food")
                           
                         ),
                         
                         mainPanel(
                           fluidRow(
+                            box(title = "Total Calories",
+                                solidHeader = T,
+                                witdh = 5,
+                                valueBoxOutput("calories"),
+                                background_color = "navy"),
+                            
                             box(title = "Nutrition Table",
                                 solidHeader = T,
                                 width = 10,
@@ -105,7 +113,7 @@ shinyUI(fluidPage(
                             box(title = "Vitamins", solidHeader=T,
                                 width = 5, collapsible = T,
                                 plotlyOutput("vitamin_plot"))
-                          )    
+                          )
                         )
                       )
              ),
