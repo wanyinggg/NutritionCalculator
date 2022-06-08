@@ -3,6 +3,7 @@ library(ggplot2)
 library(DT)
 library(plotly)
 library(shinyjs)
+library(shinydashboard)
 
 #Function to calculate BMI
 bmi <- function(weight, height){
@@ -48,7 +49,7 @@ idealWeight <- function(minIdealWeight, maxIdealWeight){
 
 ##Function to display BMI status
 bmiStatus <- function(bmi){
-
+  
   if(bmi<18.5){
     print("You are underweight. You need to gain weight.")
   }else if(bmi>18.5 && bmi<24.9){
@@ -75,10 +76,10 @@ macros <- function(bmi, dailyCalorie){
     carbsCalorie1 <- (55/100) * dailyCalorie
     proteinCalorie1 <- (30/100) * dailyCalorie
     fatCalorie1 <- (15/100) * dailyCalorie
-
+    
     df <- data.frame(value = c(carbsCalorie1, proteinCalorie1, fatCalorie1),
                      group = c("Carbohydrates", "Protein", "Fats"))
-
+    
     ggplot(df, aes(x = "", y = value, fill = group)) +
       geom_col(color = "black") +
       geom_label(aes(label = value),
@@ -86,15 +87,15 @@ macros <- function(bmi, dailyCalorie){
                  position = position_stack(vjust = 0.5),
                  show.legend = FALSE) +
       coord_polar(theta = "y")
-
+    
   }else if(bmi>18.5 && bmi<24.9){
     carbsCalorie2 <- (50/100) * dailyCalorie
     proteinCalorie2 <- (30/100) * dailyCalorie
     fatCalorie2 <- (20/100) * dailyCalorie
-
+    
     df <- data.frame(value = c(carbsCalorie2, proteinCalorie2, fatCalorie2),
                      group = c("Carbohydrates", "Protein", "Fats"))
-
+    
     ggplot(df, aes(x = "", y = value, fill = group)) +
       geom_col(color = "black") +
       geom_label(aes(label = value),
@@ -102,16 +103,16 @@ macros <- function(bmi, dailyCalorie){
                  position = position_stack(vjust = 0.5),
                  show.legend = FALSE) +
       coord_polar(theta = "y")
-
+    
   }else if(bmi>24.9){
     carbsCalorie3 <- (40/100) * dailyCalorie
     proteinCalorie3 <- (30/100) * dailyCalorie
     fatCalorie3 <- (30/100) * dailyCalorie
-
+    
     df <- data.frame(value = c(carbsCalorie3, proteinCalorie3, fatCalorie3),
                      group = c("Carbohydrates", "Protein", "Fats"))
-
-
+    
+    
     ggplot(df, aes(x = "", y = value, fill = group)) +
       geom_col(color = "black") +
       geom_label(aes(label = value),
@@ -127,30 +128,30 @@ progress <- function(weight, minIdealWeight, maxIdealWeight){
   if(weight < minIdealWeight){
     progress1 <- abs(((weight - minIdealWeight)/minIdealWeight)*100)
     percentage1 <- 100-progress1
-
+    
     data <- data.frame(category=c("Achieved", "Not Achieved"), count=c(percentage1, progress1))
-
+    
     #compute fraction
     data$fraction <- data$count / sum(data$count)
-
+    
     # compute the cumulative percentages (top of each rectangle)
     data$ymax <- cumsum(data$fraction)
-
+    
     # compute percentage
     data$percentage <- round(data$fraction*100, digits=2)
-
+    
     # Compute the bottom of each rectangle
     data$ymin <- c(0, head(data$ymax, n=-1))
-
+    
     # Compute label position
     data$labelPosition <- (data$ymax + data$ymin) / 2
-
+    
     # Compute a good label
     data$label <- paste0(data$percentage, "%")
-
+    
     # colour for the chart
     colour<-c("#006400", "#D3D3D3")
-
+    
     # Make the plot
     ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
       geom_rect() + ggtitle("Progress to achieve ideal weight:")+
@@ -161,34 +162,34 @@ progress <- function(weight, minIdealWeight, maxIdealWeight){
       theme(legend.position = "none")+
       theme(plot.title = element_text(size=28))+
       annotate(geom='text', x=-4, y=0.25, size=13, colour="dark green", label=paste0(data$percentage[data$category=="Achieved"],"%"))
-
+    
   }else if (weight > maxIdealWeight){
     progress2 <- abs(((weight-maxIdealWeight)/maxIdealWeight)*100)
     percentage2 <- 100-progress2
-
+    
     data <- data.frame(category=c("Achieved", "Not Achieved"), count=c(percentage2, progress2))
-
+    
     #compute fraction
     data$fraction <- data$count / sum(data$count)
-
+    
     # compute the cumulative percentages (top of each rectangle)
     data$ymax <- cumsum(data$fraction)
-
+    
     # compute percentage
     data$percentage <- round(data$fraction*100, digits=2)
-
+    
     # Compute the bottom of each rectangle
     data$ymin <- c(0, head(data$ymax, n=-1))
-
+    
     # Compute label position
     data$labelPosition <- (data$ymax + data$ymin) / 2
-
+    
     # Compute a good label
     data$label <- paste0(data$percentage, "%")
-
+    
     # colour for the chart
     colour<-c("#006400", "#D3D3D3")
-
+    
     # Make the plot
     ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category)) +
       geom_rect() + ggtitle("Progress to achieve ideal weight:")+
@@ -229,9 +230,10 @@ shinyServer(function(input, output) {
     output$macros <- renderPlot(isolate({macros(bmi(input$weight, input$height),dailyCalorie(tdee(input$activity, bmr(input$age, input$gender, input$weight, input$height)),bmi(input$weight, input$height)))}))
     output$progress <- renderPlot(isolate({progress(input$weight,minIdealWeight(input$height),maxIdealWeight(input$height))}))
   })
-
-  #Nutrient table
+  
+  ##Nutrient table
   this_table<-reactiveVal(food_list)
+  #If add button is pressed, add new row to the table
   observeEvent(input$add, {
     newRow <- rbind(data.frame("Food" = nutrition[[input$food_id,2]] ,
                                "Calories_Per_Serving"= nutrition[[input$food_id,4]],
@@ -241,28 +243,32 @@ shinyServer(function(input, output) {
                                "Total_Calorie" = input$no_of_serving*as.numeric(nutrition[[input$food_id,4]])),this_table())
     this_table(newRow)
   })
+  #If delete button is pressed, delete all rows
   observeEvent(input$delete, {
     this_table(food_list)
   })
+  #Display nutrient table
   output$nutrient_table<- DT::renderDataTable({
     datatable(this_table(), selection = 'single',editable = TRUE,
               options = list(dom = 't'))
   })
-
-  #Total calories
+  
+  ##Total calories
   total_calories<-reactiveVal()
+  #If add button is pressed, calculate total calories
   observeEvent(input$add,{
     sum_calories <<- sum_calories + nutrition[[input$food_id,4]]*input$no_of_serving
     total_calories(sum_calories)
   })
+  #If delete button is pressed, total calories become 0
   observeEvent(input$delete,{
     sum_calories <<- 0
     total_calories(sum_calories)
   })
-  output$calories <- renderValueBox({
-    valueBox(total_calories(),"kcal","Calories",icon = icon("fire"), color = "navy")})
-
-  #Macro bar plot
+  #Display total calories
+  output$calories <- renderText({total_calories()})
+  
+  ##Macro bar plot
   total_macro_plot<-reactiveVal()
   
   #If add button is pressed
@@ -287,7 +293,7 @@ shinyServer(function(input, output) {
     total_macro <- data.frame( macro = macro_list, amount = sum_macro)
     total_macro_plot(total_macro)
   })
-
+  
   #If clear food button is pressed
   observeEvent(input$delete,{
     #Create a vector of size 9 with all 0 value
@@ -307,15 +313,15 @@ shinyServer(function(input, output) {
                  y = total_macro_plot()$amount,
                  name = "Macronutrients",
                  type = "bar",
-                 marker = list(color = "rgb(201, 134, 134)")
+                 marker = list(color = "rgb(189,164,120)")
     )
     p <- p %>%
       layout( xaxis = list(title = "Nutrient"),
               yaxis = list(title = "Amount (mg)")
       )
   }
-
-  #Vitamin bar plot
+  
+  ##Vitamin bar plot
   total_vitamin_plot<-reactiveVal()
   #If add food button is pressed
   observeEvent(input$add,{
@@ -337,7 +343,7 @@ shinyServer(function(input, output) {
     total_vitamin <- data.frame( vitamin = vitamin_list, amount = sum_vitamin)
     total_vitamin_plot(total_vitamin)
   })
-
+  
   #If clear food button is pressed
   observeEvent(input$delete,{
     #Create a vector of size 7 with all 0 value
@@ -347,22 +353,22 @@ shinyServer(function(input, output) {
     total_vitamin <- data.frame( vitamin = vitamin_list, amount = sum_vitamin)
     total_vitamin_plot(total_vitamin)
   })
-
+  
   #Display bar chart of vitamin table
   output$vitamin_plot <- renderPlotly(plotVitamin())
-
+  
   #Function to plot of vitamin table
   plotVitamin <- function(){
     p <- plot_ly(x = total_vitamin_plot()$vitamin,
                  y = total_vitamin_plot()$amount,
                  name = "Vitamins",
                  type = "bar",
-                 marker = list(color = "rgb(231, 207, 188)")
+                 marker = list(color = "rgb(116,92,51)")
     )
     p <- p %>%
       layout( xaxis = list(title = "Vitamin"),
               yaxis = list(title = "Amount (mg)")
       )
   }
-
+  
 })
