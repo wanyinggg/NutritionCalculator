@@ -12,6 +12,30 @@ nutrition<-read.csv("nutrition.csv")
 food_name_list<-nutrition[[1]]
 names(food_name_list)<- nutrition$name
 
+#Function to print value box
+valueBox <- function(value, subtitle, icon, color) {
+  div(class = "col-lg-3 col-md-6",
+      div(class = "panel panel-primary",
+          div(class = "panel-heading", style = paste0("background-color:", color),
+              div(class = "row",
+                  div(class = "col-xs-3",
+                      icon(icon, "fa-5x")
+                  ),
+                  div(class = ("col-xs-9 text-right"),
+                      div(style = ("font-size: 56px; font-weight: bold;"),
+                          textOutput(value)
+                      ),
+                      div(subtitle)
+                  )
+              )
+          ),
+          div(class = "panel-footer",
+              div(class = "clearfix")
+          )
+      )
+  )
+}
+
 # Define UI 
 shinyUI(fluidPage(
   theme = shinytheme("flatly"),
@@ -91,20 +115,21 @@ shinyUI(fluidPage(
                         ),
                         
                         mainPanel(
-                          fluidRow(
-                            box(title = "Total Calories",
-                                solidHeader = T,
-                                witdh = 5,
-                                valueBoxOutput("calories"),
-                                background_color = "navy"),
-                            
+                          fluidPage(
+                            fluidRow(id="main-panel",
+                                     valueBox(value = "calories",
+                                              subtitle = "kcal calories",
+                                              icon = "fire",
+                                              color = "#E09F1F")
+                            ),
                             box(title = "Nutrition Table",
                                 solidHeader = T,
                                 width = 10,
                                 collapsible = T,
                                 collapsed = F,
                                 tags$p(textOutput("serving", inline = T)),
-                                div(DT::DTOutput("nutrient_table"), style = "font-size: 70%;")),
+                                div(DT::DTOutput("nutrient_table"), style = "font-size: 70%;"),
+                                ),
                             
                             box(title = "Macronutrients", solidHeader = T,
                                 width = 5, collapsible = T,
