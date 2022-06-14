@@ -160,7 +160,7 @@ progress <- function(weight, minIdealWeight, maxIdealWeight){
       xlim(c(-4, 4)) +
       theme_void() +
       theme(legend.position = "none")+
-      theme(plot.title = element_text(size=28))+
+      theme(plot.title = element_text(size=20, hjust = 0))+
       annotate(geom='text', x=-4, y=0.25, size=13, colour="dark green", label=paste0(data$percentage[data$category=="Achieved"],"%"))
     
   }else if (weight > maxIdealWeight){
@@ -243,8 +243,8 @@ shinyServer(function(input, output) {
                                "Total_Calorie" = input$no_of_serving*as.numeric(nutrition[[input$food_id,4]])),this_table())
     this_table(newRow)
   })
-  #If delete button is pressed, delete all rows
-  observeEvent(input$delete, {
+  #If clear button is pressed, clear the table
+  observeEvent(input$clear, {
     this_table(food_list)
   })
   #Display nutrient table
@@ -260,8 +260,8 @@ shinyServer(function(input, output) {
     sum_calories <<- sum_calories + nutrition[[input$food_id,4]]*input$no_of_serving
     total_calories(sum_calories)
   })
-  #If delete button is pressed, total calories become 0
-  observeEvent(input$delete,{
+  #If clear button is pressed, total calories become 0
+  observeEvent(input$clear,{
     sum_calories <<- 0
     total_calories(sum_calories)
   })
@@ -295,7 +295,7 @@ shinyServer(function(input, output) {
   })
   
   #If clear food button is pressed
-  observeEvent(input$delete,{
+  observeEvent(input$clear,{
     #Create a vector of size 9 with all 0 value
     sum_macro <<- c(0,0,0,0,0,0,0,0,0)
     
@@ -345,7 +345,7 @@ shinyServer(function(input, output) {
   })
   
   #If clear food button is pressed
-  observeEvent(input$delete,{
+  observeEvent(input$clear,{
     #Create a vector of size 7 with all 0 value
     sum_vitamin <<- c(0,0,0,0,0,0,0)
     
