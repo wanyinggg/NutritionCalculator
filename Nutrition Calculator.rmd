@@ -1,0 +1,64 @@
+---
+title: "Nutrition Calculator" 
+author: Healthy Planet - Au Wan Ying | Lee Xiao Yu | Chuah Ann Joe | Tiew Ker Xin
+date: "`r Sys.Date()`"
+output:
+  ioslides_presentation: default
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Introduction {data-background=#FFFFCC}
+<font size="5"><span style="color:midnightblue">**Problem**</span></font>  
+<font size="3"><span style="color:cornflowerblue">People nowadays face a hectic life until they ignore their daily diets. This causes obesity becomes the most common disease occurs among Malaysians.</span></font>  
+</br>
+<font size="5"><span style="color:midnightblue">**Questions**</span></font>   
+<font size="3"><span style="color:cornflowerblue">- How to find out your recommended calories requirement for the day?  
+- How to find out the amount of calories and nutrients in the foods you eat?
+</span></font>  
+</br>
+<font size="5"><span style="color:midnightblue">**Skateholders**</span></font>  
+<font size="3"><span style="color:cornflowerblue">- Ministry of Health  
+- Nutritionist  
+- Public who emphasize their diets</span></font>  
+</br>
+<font size="3"><span style="color:midnightblue">*ShinyApp: *</span></font>  
+<font size="3"><span style="color:midnightblue">*GitHub: *https://github.com/wanyinggg/NutritionCalculator</span></font>  
+
+## Description of dataset {data-background=#FFFFCC}
+
+<font size="3"><span style="color:midnightblue">We found and retrieve the dataset from kaggle. We modified the dataset such as removing the unit of each value to make the attributes numeric and deleting some unused columns. The modified dataset contains 8790 rows and 24 columns, showing the nutrition values such as calories, fat, and vitamins for each type of food. All the attributes are numeric except for the food name.</span></font>
+
+## User Manual {data-background=#FFFFCC}
+
+![](C:\Users\annjo\OneDrive\Documents\usermanualNC.png){width=100%}
+
+## Data Story and Summary Expectation {data-background=#FFFFCC}
+<font size="5"><span style="color:midnightblue">**Data Story**</span></font> 
+<div class="columns-2">
+  ![](C:\Users\annjo\OneDrive\Documents\dataStory1.jpeg){height=55%, width=30%}
+  
+<font size="2"><span style="color:midnightblue">**Figure 1**: This bar chart gives a visual analysis of the amount of macronutrients contained in the food one had consumed. He extracted sodium the most from his diet</span></font> 
+
+![](C:\Users\annjo\OneDrive\Documents\dataStory2.jpeg){height=55%, width=30%}
+ 
+<font size="2"><span style="color:midnightblue">**Figure 2**: This bar chart shows the amount of vitamins found in the food one had ingested visually. It is found that there is a lot of Vitamin C found in his diet.</span></font>
+</div>
+
+<font size="5"><span style="color:midnightblue">**Summary of Expectation**</span></font>  
+<font size="2"><span style="color:cornflowerblue">**We have learned the importance of:** </span></font>  
+<div class="columns-2">
+<font size="2"><span style="color:cornflowerblue">
+- Applying the data science process  
+- Asking the specific and answerable questions  
+</span></font>
+
+
+<font size="2"><span style="color:cornflowerblue">
+- Finding the right and suitable data                          
+- Collaboration to simplify tasks
+</span></font>
+</div>
