@@ -46,9 +46,13 @@ shinyUI(fluidPage(
                         img(src='2.png',width=1300,height=640),
                         img(src='3.png',width=1300,height=640),
                         img(src='4.png',width=1300,height=360),
-                        img(src='5.png',width=1300,height=640),
                       )
               ),
+             tabPanel("User Manual",
+                      mainPanel(
+                        img(src='userguide.png',width=620,height=1350),
+                      )
+             ),
              tabPanel("Calorie Calculator",
                       sidebarLayout(
                         sidebarPanel( 
@@ -110,7 +114,7 @@ shinyUI(fluidPage(
                                        min=1,max=10000,1),
                           
                           actionButton("add","Add Food"),
-                          actionButton("delete","Delete Food")
+                          actionButton("clear","Clear Food")
                           
                         ),
                         
