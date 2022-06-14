@@ -254,7 +254,8 @@ shinyServer(function(input, output) {
   })
   
   ##Total calories
-  total_calories<-reactiveVal()
+  total_calories<-reactiveVal(0)
+  sum_calories<-0
   #If add button is pressed, calculate total calories
   observeEvent(input$add,{
     sum_calories <<- sum_calories + nutrition[[input$food_id,4]]*input$no_of_serving
@@ -367,7 +368,7 @@ shinyServer(function(input, output) {
     )
     p <- p %>%
       layout( xaxis = list(title = "Vitamin"),
-              yaxis = list(title = "Amount (mg)")
+              yaxis = list(title = "Amount (mcg)")
       )
   }
   
