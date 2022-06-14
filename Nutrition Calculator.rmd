@@ -25,7 +25,7 @@ knitr::opts_chunk$set(echo = FALSE)
 - Nutritionist  
 - Public who emphasize their diets</span></font>  
 </br>
-<font size="3"><span style="color:midnightblue">*ShinyApp: *</span></font>  
+<font size="3"><span style="color:midnightblue">*ShinyApp:* https://wanying.shinyapps.io/HealthyPlanet/</span></font>  
 <font size="3"><span style="color:midnightblue">*GitHub: *https://github.com/wanyinggg/NutritionCalculator</span></font>  
 
 ## Data {data-background=#EAF8F7}
