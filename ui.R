@@ -83,10 +83,10 @@ shinyUI(fluidPage(
                           h4("Your Total Daily Energy Expenditure (TDEE) is"),
                           verbatimTextOutput("tdee"),
                           
-                          h4("Your daily calorie should be"),
+                          h4("Your daily calorie should be (in kcal):"),
                           verbatimTextOutput("dailyCalorie"),
                           
-                          h4("Recommended macronutrients:"),
+                          h4("Recommended macronutrients (in kcal):"),
                           plotOutput("macros"),
                           
                           plotOutput("progress")
