@@ -120,11 +120,12 @@ shinyUI(fluidPage(
                         
                         mainPanel(
                           fluidPage(
-                            fluidRow(id="main-panel",
-                                     valueBox(value = "calories",
-                                              subtitle = "kcal calories",
-                                              icon = "fire",
-                                              color = "#E09F1F")
+                           fluidRow(style='width:1900px',
+                                    id="main-panel",
+                                    valueBox(value = "calories",
+                                             subtitle = "kcal calories",
+                                             icon = "fire",
+                                             color = "#E09F1F")
                             ),
                             box(title = "Nutrition Table",
                                 solidHeader = T,
