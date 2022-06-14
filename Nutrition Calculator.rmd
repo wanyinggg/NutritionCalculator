@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = FALSE)
 - How to find out the amount of calories and nutrients in the foods you eat?
 </span></font>  
 </br>
-<font size="5"><span style="color:midnightblue">**Skateholders**</span></font>  
+<font size="5"><span style="color:midnightblue">**Stakeholders**</span></font>  
 <font size="3"><span style="color:cornflowerblue">- Ministry of Health  
 - Nutritionist  
 - Public who emphasize their diets</span></font>  
