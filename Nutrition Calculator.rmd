@@ -80,3 +80,12 @@ The amount of nutrients contained in food will be displayed to estimate the nutr
 - Collaborating with teammates to finish the project on time  
 </span></font>
 </div>
+
+## Key Takeways{data-background=#EAF8F7}
+<font size="5"><span style="color:midnightblue"> - By showing the ideal weight, daily calories and portion of macro nutrients needed, Healthy Planet makes us pay more attention to our health.  
+</br>  
+- Healthy Planet help us make informed food choices when grocery shopping and preparing food at home.  
+</br>  
+- We can make healthy choices when eating out, even at fast food restaurants.   
+</br>  
+- We can maintain better eating habits and aid in attaining a balanced energy level.  </span></font>  
